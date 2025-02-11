@@ -88,166 +88,350 @@ A greedy algorithm for data compression that assigns shorter binary codes to mor
 ## **4. Dynamic Programming (DP)**  
 
 ### **19. What is dynamic programming, and how does it differ from divide and conquer?**  
-Dynamic programming (DP) is an optimization technique used to solve problems by breaking them into overlapping subproblems and storing solutions to avoid redundant computations.  
-- **Difference from divide and conquer:**  
-  - DP solves overlapping subproblems and stores results (memoization).  
-  - Divide and conquer solves independent subproblems recursively.  
-  - Example: Merge Sort (divide and conquer) vs. Fibonacci sequence (DP).  
+Dynamic Programming (DP) is an optimization technique used to solve problems by breaking them into **overlapping subproblems** and storing their solutions to avoid redundant computations. It is primarily used for problems with **optimal substructure**, meaning the solution to a larger problem is built using solutions to its subproblems.  
 
-### **20. What is the principle of optimality in DP?**  
-The principle states that an optimal solution to a problem contains optimal solutions to its subproblems.  
-Example: The **Shortest Path Problem** follows this principle, as any segment of an optimal path is also optimal.  
+**Difference from Divide and Conquer:**  
+- **DP:** Solves overlapping subproblems and stores solutions (memoization/tabulation).  
+- **Divide and Conquer:** Solves independent subproblems and combines results (e.g., Merge Sort).  
 
-### **21. Solve Fibonacci numbers using DP.**  
-A recursive Fibonacci function has **exponential O(2ⁿ) complexity**. Using DP, we store computed values:  
-
-**Top-down (memoization):**  
-```cpp
-int fib(int n, vector<int>& dp) {
-  if (n <= 1) return n;
-  if (dp[n] != -1) return dp[n];
-  return dp[n] = fib(n - 1, dp) + fib(n - 2, dp);
-}
-```  
-**Bottom-up (tabulation) reduces time to O(n):**  
-```cpp
-int fib(int n) {
-  vector<int> dp(n+1);
-  dp[0] = 0, dp[1] = 1;
-  for (int i = 2; i <= n; i++)
-    dp[i] = dp[i-1] + dp[i-2];
-  return dp[n];
-}
-```  
-
-### **22. Explain Warshall’s Algorithm for the transitive closure of a graph.**  
-Warshall’s algorithm determines if there is a path between two vertices in a graph.  
-- Uses a **Boolean adjacency matrix** and updates paths iteratively.  
-- Runs in **O(V³)** time complexity.  
-
-### **23. Explain Floyd-Warshall’s Algorithm for shortest paths.**  
-Floyd-Warshall finds shortest paths between all pairs of vertices in a weighted graph.  
-- Uses a **distance matrix**, updating values iteratively.  
-- Runs in **O(V³)**, useful for dense graphs.  
-
-### **24. Explain the Matrix Chain Multiplication problem.**  
-Given matrices \( A_1, A_2, ..., A_n \), we find the optimal way to parenthesize them to minimize computations.  
-- Uses DP with the recurrence:  
-  \[
-  dp[i][j] = \min(dp[i][k] + dp[k+1][j] + A[i-1] \times A[k] \times A[j])
-  \]
-- Runs in **O(n³)**.  
-
-### **25. What is the Longest Common Subsequence (LCS) problem?**  
-LCS finds the longest sequence that appears in order in both strings.  
-- DP formula:  
-  \[
-  dp[i][j] =
-  \begin{cases}
-    dp[i-1][j-1] + 1, & \text{if } s_1[i] == s_2[j] \\
-    \max(dp[i-1][j], dp[i][j-1]), & \text{otherwise}
-  \end{cases}
-  \]
-- Runs in **O(mn)**.  
-
-### **26. What is the Optimal Binary Search Tree (OBST) problem?**  
-OBST minimizes the search cost in a BST when keys have different access probabilities.  
-- DP formula considers subtree costs and search frequencies.  
-- Runs in **O(n³)**.  
+**Example:**  
+- **Fibonacci Sequence (DP):** Stores computed values to prevent repeated calculations.  
+- **Merge Sort (Divide and Conquer):** Recursively divides the array and merges sorted halves.  
 
 ---
 
-## **5. Graph Algorithms**  
+### **20. What is the principle of optimality in dynamic programming?**  
+The **Principle of Optimality** states that an optimal solution to a problem contains optimal solutions to its subproblems. In other words, if a problem can be broken down into subproblems, solving each subproblem optimally ensures an optimal overall solution.  
+
+**Example:**  
+In the **Shortest Path Problem**, the shortest route from A to C via B ensures that the path from A to B and B to C are also optimal. This allows dynamic programming algorithms like **Floyd-Warshall** and **Dijkstra’s algorithm** to work efficiently.  
+
+---
+
+### **21. Solve Fibonacci numbers using dynamic programming.**  
+The Fibonacci sequence follows the recurrence relation:  
+\[
+F(n) = F(n-1) + F(n-2), \quad \text{where } F(0) = 0, \, F(1) = 1
+\]  
+
+**Naive Recursion (Exponential Time Complexity O(2ⁿ))**  
+```cpp
+int fib(int n) {
+    if (n <= 1) return n;
+    return fib(n-1) + fib(n-2);
+}
+```  
+This approach is inefficient due to repeated calculations.  
+
+**Dynamic Programming (Efficient O(n) Solution)**  
+**Memoization (Top-Down Approach)**  
+```cpp
+int fib(int n, vector<int>& dp) {
+    if (n <= 1) return n;
+    if (dp[n] != -1) return dp[n];
+    return dp[n] = fib(n - 1, dp) + fib(n - 2, dp);
+}
+```  
+**Tabulation (Bottom-Up Approach)**  
+```cpp
+int fib(int n) {
+    vector<int> dp(n+1);
+    dp[0] = 0, dp[1] = 1;
+    for (int i = 2; i <= n; i++)
+        dp[i] = dp[i-1] + dp[i-2];
+    return dp[n];
+}
+```  
+This avoids redundant computations, making the algorithm efficient.  
+
+---
+
+### **22. Explain Warshall’s Algorithm for transitive closure of a graph.**  
+Warshall’s Algorithm is used to determine if there is a **path between every pair of vertices** in a directed graph. It constructs a **Boolean adjacency matrix**, where `1` represents a path exists and `0` represents no path.  
+
+**Algorithm:**  
+1. Initialize an adjacency matrix **A**, where `A[i][j] = 1` if there is a direct edge from vertex `i` to `j`, otherwise `0`.  
+2. For each intermediate vertex `k`, update `A[i][j]` as:  
+   \[
+   A[i][j] = A[i][j] \lor (A[i][k] \land A[k][j])
+   \]  
+3. After **V** iterations (where V is the number of vertices), the matrix shows whether a path exists between any two vertices.  
+
+**Time Complexity:** \( O(V^3) \)  
+
+---
+
+### **23. Explain Floyd-Warshall’s Algorithm for shortest paths.**  
+Floyd-Warshall finds the shortest path between **all pairs of vertices** in a weighted graph.  
+
+**Algorithm Steps:**  
+1. Create a **distance matrix** `D[i][j]`, where `D[i][j]` represents the shortest distance from vertex `i` to `j`.  
+2. Initialize `D[i][j]` with direct edge weights (or `∞` if no edge exists).  
+3. For each intermediate vertex `k`, update distances using:  
+   \[
+   D[i][j] = \min(D[i][j], D[i][k] + D[k][j])
+   \]  
+4. After **V** iterations, `D[i][j]` contains the shortest distance between all vertex pairs.  
+
+**Time Complexity:** \( O(V^3) \)  
+
+---
+
+### **24. Explain the Matrix Chain Multiplication problem.**  
+Given matrices **A₁, A₂, ..., Aₙ**, we aim to parenthesize them optimally to minimize scalar multiplications.  
+
+**Recurrence Relation:**  
+\[
+dp[i][j] = \min_{i \leq k < j} (dp[i][k] + dp[k+1][j] + A[i-1] \times A[k] \times A[j])
+\]  
+This ensures the multiplication sequence is optimized.  
+
+**Time Complexity:** \( O(n^3) \)  
+
+---
+
+### **25. What is the Longest Common Subsequence (LCS) problem?**  
+LCS finds the longest subsequence appearing in both strings while maintaining order.  
+
+**Recurrence Relation:**  
+\[
+dp[i][j] =
+\begin{cases}
+    dp[i-1][j-1] + 1, & \text{if } s_1[i] == s_2[j] \\
+    \max(dp[i-1][j], dp[i][j-1]), & \text{otherwise}
+\end{cases}
+\]  
+Example:  
+- Input: `X = "ABCBDAB"`, `Y = "BDCAB"`  
+- LCS: `"BCAB"`  
+
+**Time Complexity:** \( O(mn) \)  
+
+---
+
+### **26. What is the Optimal Binary Search Tree (OBST) problem?**  
+OBST minimizes search cost for a Binary Search Tree (BST) when keys have **different access probabilities**.  
+
+**Recurrence Relation:**  
+\[
+dp[i][j] = \min_{i \leq k \leq j} (dp[i][k-1] + dp[k+1][j] + W(i,j))
+\]  
+where **W(i, j)** is the sum of probabilities.  
+
+**Time Complexity:** \( O(n^3) \)  
+
+---
 
 ### **27. What are graph traversal techniques?**  
-Graph traversal methods include:  
-- **Depth First Search (DFS):** Uses recursion or stack, explores as deep as possible before backtracking.  
-- **Breadth First Search (BFS):** Uses a queue, explores all neighbors before moving to the next level.  
+Graph traversal involves systematically visiting vertices. Two main techniques are:  
+1. **Depth-First Search (DFS):**  
+   - Uses a stack (or recursion).  
+   - Explores as deep as possible before backtracking.  
+   - **Time Complexity:** \( O(V + E) \)  
+
+2. **Breadth-First Search (BFS):**  
+   - Uses a queue.  
+   - Explores all neighbors before moving deeper.  
+   - **Time Complexity:** \( O(V + E) \)  
+
+---
 
 ### **28. Implement BFS in a graph.**  
 ```cpp
 void BFS(int start, vector<int> adj[], int V) {
-  queue<int> q;
-  vector<bool> visited(V, false);
-  q.push(start);
-  visited[start] = true;
-  while (!q.empty()) {
-    int node = q.front(); q.pop();
-    cout << node << " ";
-    for (int neighbor : adj[node])
-      if (!visited[neighbor]) {
-        visited[neighbor] = true;
-        q.push(neighbor);
-      }
-  }
+    queue<int> q;
+    vector<bool> visited(V, false);
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        int node = q.front(); q.pop();
+        cout << node << " ";
+        for (int neighbor : adj[node])
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+    }
 }
 ```  
 
-### **29. Implement DFS in a graph.**  
-```cpp
-void DFS(int node, vector<int> adj[], vector<bool>& visited) {
-  visited[node] = true;
-  cout << node << " ";
-  for (int neighbor : adj[node])
-    if (!visited[neighbor]) DFS(neighbor, adj, visited);
-}
-```  
+
+
+## **5. Backtracking and Branch & Bound**  
+
+### **29. What is the 0/1 Knapsack Problem, and how is it solved using backtracking?**  
+The **0/1 Knapsack Problem** is an optimization problem where a thief must maximize the total value of items in a **knapsack of limited capacity**. Each item has a weight and value, and it can either be **taken entirely (1) or left (0)**—hence the name **0/1 Knapsack**.  
+
+**Backtracking Approach:**  
+- Explore all possible subsets of items.
+- Maintain a **current weight and value**.
+- If adding an item exceeds the knapsack’s capacity, **backtrack** to try a different subset.  
+- Use **pruning** to avoid unnecessary computations.
+
+**Time Complexity:** \( O(2^n) \) (Exponential).  
 
 ---
 
-## **6. Backtracking and Branch & Bound**  
+### **30. Explain the Eight Queens Problem and its solution using backtracking.**  
+The **Eight Queens Problem** requires placing 8 queens on an **8×8 chessboard** such that **no two queens attack each other**.  
 
-### **30. Solve the 0/1 Knapsack Problem using Branch & Bound.**  
-- Unlike DP, **Branch & Bound** prunes branches where the weight exceeds capacity.  
-- Uses a priority queue to explore promising paths first.  
-- Runs in **O(2ⁿ)** in the worst case.  
+**Backtracking Solution:**  
+1. Place queens **one by one** in columns.
+2. For each row, check if placing a queen **leads to conflicts**.
+3. If it’s safe, move to the next column.
+4. If a conflict arises, **backtrack** and try another row.  
 
-### **31. Explain the Eight Queens problem using backtracking.**  
-The Eight Queens problem places 8 queens on an 8x8 chessboard without attacking each other.  
-- Recursively places queens, backtracking when a conflict arises.  
-- Runs in **O(n!)**.  
-
-### **32. What is the Travelling Salesman Problem (TSP)?**  
-TSP finds the shortest cycle visiting all cities exactly once.  
-- **Backtracking:** Tries all permutations (O(n!)).  
-- **Branch & Bound:** Uses cost reduction techniques for better pruning.  
+**Time Complexity:** \( O(n!) \).  
 
 ---
 
-## **7. String Matching Algorithms**  
+### **31. What is the Traveling Salesman Problem (TSP), and how is it solved using Branch & Bound?**  
+The **TSP** involves finding the shortest tour that visits each city exactly once and returns to the starting point.  
 
-### **33. What is the Naive String Matching algorithm?**  
-- Compares the pattern to each substring of the text.  
-- Runs in **O(nm)** worst case, where \( n \) is text length and \( m \) is pattern length.  
+**Branch & Bound Approach:**  
+1. Start from a city and explore all possible routes.
+2. Maintain a **cost matrix** to track travel costs.
+3. Use **bounding functions** to eliminate unpromising routes.
+4. The lowest-cost complete tour is the optimal solution.  
 
-### **34. Explain the Rabin-Karp algorithm.**  
-- Uses **hashing** to compare substrings efficiently.  
-- Rolling hash function reduces comparisons.  
-- Average complexity: **O(n + m)**.  
-
-### **35. Explain the Knuth-Morris-Pratt (KMP) algorithm.**  
-- Builds a **prefix function** to avoid unnecessary comparisons.  
-- Runs in **O(n + m)** time.  
+**Time Complexity:** \( O(n!) \) (Exact), \( O(n^2 2^n) \) (Held-Karp DP).  
 
 ---
 
-## **8. Complexity Theory**  
+## **6. String Matching Algorithms**  
 
-### **36. What are P and NP problems?**  
-- **P (Polynomial time):** Problems solvable in polynomial time (e.g., Sorting, Shortest Path).  
-- **NP (Nondeterministic Polynomial time):** Problems where solutions can be **verified** in polynomial time but may take **exponential time** to solve (e.g., TSP, Knapsack).  
+### **32. What is the Naïve String Matching Algorithm?**  
+The **Naïve Algorithm** checks for a pattern **P** in a text **T** by sliding **P** one character at a time over **T** and checking for a match.  
 
-### **37. What is NP-Completeness?**  
-A problem is **NP-complete** if:  
-1. It is in NP.  
-2. Any NP problem can be **reduced** to it in polynomial time.  
-Example: **3-SAT, Traveling Salesman Problem**.  
+**Algorithm Steps:**  
+1. Compare **P** with a substring of **T** at each position.  
+2. If a match is found, return the index.  
+3. Otherwise, shift **P** one position to the right and repeat.  
 
-### **38. What is an NP-Hard problem?**  
-NP-Hard problems are at least as hard as NP problems but do not have to be in NP.  
-Example: **Halting Problem** (not verifiable in polynomial time).  
+**Time Complexity:** \( O(mn) \) (Worst case).  
 
-### **39. What is polynomial reduction?**  
-- Converts one problem to another in **polynomial time**.  
-- Used to prove **NP-Completeness**.  
-Example: **SAT can be reduced to 3-SAT**.
+---
+
+### **33. Explain the Rabin-Karp Algorithm and its advantages.**  
+Rabin-Karp uses **hashing** to find patterns efficiently.  
+
+**Algorithm Steps:**  
+1. Compute a **hash value** for the pattern **P** and the first substring of **T**.  
+2. Slide **P** across **T** and **compare hash values** instead of characters.  
+3. If hash values match, perform a **character-wise check**.  
+
+**Advantages:**  
+- Efficient for multiple pattern matching.  
+- Average case: \( O(n) \).  
+- Worst case (hash collisions): \( O(mn) \).  
+
+---
+
+### **34. Explain the Knuth-Morris-Pratt (KMP) Algorithm.**  
+KMP improves **Naïve Matching** by using a **precomputed prefix table** to avoid redundant comparisons.  
+
+**Algorithm Steps:**  
+1. Build a **Longest Prefix Suffix (LPS) table**.  
+2. Compare **P** and **T** using the LPS table to determine how much to shift.  
+
+**Time Complexity:** \( O(n + m) \).  
+
+---
+
+## **7. Complexity Theory**  
+
+### **35. What are P and NP problems?**  
+- **P (Polynomial Time):** Problems solvable in polynomial time (\( O(n^k) \)). Example: **Sorting, Dijkstra’s algorithm**.  
+- **NP (Nondeterministic Polynomial Time):** Problems where a **solution can be verified** in polynomial time. Example: **TSP, 0/1 Knapsack**.  
+
+---
+
+### **36. What are NP-Complete Problems? Give examples.**  
+NP-Complete problems are **both NP and NP-Hard**—meaning:  
+- Finding a solution is **as hard as verifying it**.  
+- If an **efficient solution** exists for one NP-Complete problem, all NP problems can be solved efficiently.  
+
+**Examples:**  
+1. **Traveling Salesman Problem (TSP)**  
+2. **Hamiltonian Path**  
+3. **Subset Sum Problem**  
+
+---
+
+### **37. What are NP-Hard problems? How do they differ from NP-Complete?**  
+**NP-Hard** problems are **at least as hard as NP problems**, but they may **not be in NP** (i.e., they may not have verifiable solutions in polynomial time).  
+
+**Difference from NP-Complete:**  
+- NP-Complete: Must be **in NP** and **as hard as NP**.  
+- NP-Hard: Can be **harder than NP**, even unsolvable in polynomial time.  
+
+**Example:** **Halting Problem** (undecidable).  
+
+---
+
+### **38. What is Polynomial Reduction?**  
+Polynomial Reduction transforms one problem **A** into another problem **B** in polynomial time, proving that **B** is at least as hard as **A**.  
+
+Example:  
+To show **SAT (Boolean Satisfiability) is NP-Complete**, we **reduce** every NP problem to SAT.  
+
+---
+
+### **39. Why is the P vs. NP problem important?**  
+If \( P = NP \), then all NP problems can be solved in polynomial time, revolutionizing fields like **cryptography, AI, and optimization**. However, this remains an **unsolved problem** in computer science.  
+
+---
+
+## **Final Set of Questions**  
+
+### **40. What is Asymptotic Notation, and why is it used?**  
+Asymptotic Notation describes the **growth rate of an algorithm’s runtime** as input size increases.  
+
+**Types:**  
+- **Big-O (O):** Upper bound (worst-case).  
+- **Theta (Θ):** Tight bound (average case).  
+- **Omega (Ω):** Lower bound (best case).  
+
+Used for comparing algorithms **independently of hardware or implementation details**.  
+
+---
+
+### **41. What is the Master’s Theorem, and how is it used?**  
+The **Master’s Theorem** provides a shortcut for solving **divide-and-conquer** recurrence relations of the form:  
+\[
+T(n) = aT(n/b) + O(n^d)
+\]  
+
+**Cases:**  
+1. \( d > \log_b a \) → \( O(n^d) \)  
+2. \( d = \log_b a \) → \( O(n^d \log n) \)  
+3. \( d < \log_b a \) → \( O(n^{\log_b a}) \)  
+
+**Example:** Merge Sort \( T(n) = 2T(n/2) + O(n) \) → \( O(n \log n) \).  
+
+---
+
+### **42. What is Strassen’s Matrix Multiplication?**  
+Strassen’s Algorithm improves matrix multiplication from **\( O(n^3) \) to \( O(n^{2.81}) \)** using divide and conquer.  
+
+**Algorithm Steps:**  
+1. Divide matrices into **4 submatrices**.  
+2. Compute **7 products instead of 8**.  
+3. Combine results to get the final matrix.  
+
+Used in **image processing, scientific computing**.  
+
+---
+
+### **43. What is Huffman Coding, and why is it used?**  
+Huffman Coding is a **greedy algorithm** for data compression.  
+
+**Steps:**  
+1. Build a **frequency table**.  
+2. Create a **Huffman tree** (lower frequency → deeper nodes).  
+3. Encode data using **variable-length codes**.  
+
+**Example:**  
+Text: `AAABBBC` → Encoded: `1101100110` (using shorter codes for frequent characters).  
+
+
