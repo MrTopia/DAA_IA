@@ -10,12 +10,172 @@ Asymptotic notations describe the time or space complexity of an algorithm in te
 - **Omega (Ω):** Represents the lower bound (best-case complexity). Example: Ω(n) for Insertion Sort in a sorted array.  
 
 ### **3. Explain growth rates with examples.**  
-Growth rate describes how an algorithm's running time increases with input size. Examples include:  
-- **Constant time (O(1)):** Accessing an element in an array.  
-- **Logarithmic time (O(log n)):** Binary search, as it halves the search space at each step.  
-- **Linear time (O(n)):** Traversing an array using a loop.  
-- **Quadratic time (O(n²)):** Nested loops, such as in Bubble Sort.  
-- **Exponential time (O(2ⁿ)):** Recursive Fibonacci calculation.  
+Time complexity measures the **growth rate** of an algorithm's execution time **relative to input size (n)**. The major types are:  
+
+### **1. Constant Time – \( O(1) \)**
+- **Execution time does not depend on input size.**  
+- The algorithm runs in a **fixed number of steps** regardless of \( n \).  
+
+**Example:**  
+```cpp
+int firstElement(int arr[]) {
+    return arr[0];  // Always executes once
+}
+```
+Even if the array has 1000 elements, the function runs in **constant time**.  
+
+---
+
+### **2. Logarithmic Time – \( O(\log n) \)**
+- The algorithm **reduces the problem size** in each step (e.g., halves it).  
+- Found in **binary search, tree operations**.  
+
+**Example: Binary Search**  
+```cpp
+int binarySearch(int arr[], int n, int key) {
+    int left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == key) return mid;
+        else if (arr[mid] < key) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+```
+Each iteration halves the search space, leading to **\( O(\log n) \) complexity**.  
+
+---
+
+### **3. Linear Time – \( O(n) \)**
+- Execution time **increases proportionally** with input size.  
+- Common in **simple loops**.  
+
+**Example: Finding Maximum in an Array**  
+```cpp
+int findMax(int arr[], int n) {
+    int maxVal = arr[0];
+    for (int i = 1; i < n; i++) {
+        if (arr[i] > maxVal) maxVal = arr[i];
+    }
+    return maxVal;
+}
+```
+For an array of size **1000**, it runs **1000 times**, making it **\( O(n) \)**.  
+
+---
+
+### **4. Linearithmic Time – \( O(n \log n) \)**
+- Found in **efficient sorting algorithms (Merge Sort, QuickSort, Heap Sort)**.  
+- Due to **recursive division** (log factor) and **merging** (linear factor).  
+
+**Example: Merge Sort**  
+```cpp
+void mergeSort(int arr[], int left, int right) {
+    if (left >= right) return;
+    int mid = left + (right - left) / 2;
+    mergeSort(arr, left, mid);
+    mergeSort(arr, mid + 1, right);
+    merge(arr, left, mid, right);
+}
+```
+Each division takes **\( O(\log n) \)** time, and merging takes **\( O(n) \)**, leading to **\( O(n \log n) \)**.  
+
+---
+
+### **5. Quadratic Time – \( O(n^2) \)**
+- Found in **nested loops**, common in brute-force algorithms.  
+- **Slow for large inputs**.  
+
+**Example: Bubble Sort**  
+```cpp
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) swap(arr[j], arr[j + 1]);
+        }
+    }
+}
+```
+Each element is compared with every other element, making it **\( O(n^2) \)**.  
+
+---
+
+### **6. Cubic Time – \( O(n^3) \)**
+- Appears in **triple nested loops**.  
+- Found in **matrix multiplication, Floyd-Warshall algorithm**.  
+
+**Example: Floyd-Warshall Algorithm for Shortest Paths**  
+```cpp
+for (int k = 0; k < n; k++) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+        }
+    }
+}
+```
+For **\( n = 100 \)**, this runs **1,000,000 times**!  
+
+---
+
+### **7. Exponential Time – \( O(2^n) \)**
+- Found in **recursive algorithms** like Fibonacci, Subset Problems.  
+- **Impractical for large \( n \)**.  
+
+**Example: Recursive Fibonacci**  
+```cpp
+int fib(int n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+```
+Each call branches into two more calls, leading to **exponential growth**.  
+
+---
+
+### **8. Factorial Time – \( O(n!) \)**
+- Found in **brute-force combinatorial problems** (TSP, Permutations).  
+- **Unusable for large inputs**.  
+
+**Example: Generating All Permutations**  
+```cpp
+void permute(string s, int l, int r) {
+    if (l == r) cout << s << endl;
+    else {
+        for (int i = l; i <= r; i++) {
+            swap(s[l], s[i]);
+            permute(s, l + 1, r);
+            swap(s[l], s[i]);
+        }
+    }
+}
+```
+For **\( n = 5 \)**, it runs **\( 5! = 120 \)** times!  
+
+---
+
+### **Summary Table**  
+
+| Complexity  | Name                 | Example Algorithm             | Growth Rate |
+|------------|----------------------|------------------------------|------------|
+| \( O(1) \)   | Constant Time        | Accessing an array element   | Same time always |
+| \( O(\log n) \)  | Logarithmic Time    | Binary Search                | Grows slowly |
+| \( O(n) \)   | Linear Time         | Finding Max in an array      | Doubles if \( n \) doubles |
+| \( O(n \log n) \) | Linearithmic Time   | Merge Sort                   | Slightly faster than \( O(n^2) \) |
+| \( O(n^2) \) | Quadratic Time      | Bubble Sort                   | Slow for large \( n \) |
+| \( O(n^3) \) | Cubic Time          | Floyd-Warshall Algorithm      | Even slower |
+| \( O(2^n) \) | Exponential Time    | Fibonacci (Recursive)        | Doubles with each increment |
+| \( O(n!) \)  | Factorial Time      | Generating all permutations  | Unmanageable for large \( n \) |
+
+---
+
+### **Conclusion**
+- **Best cases:** \( O(1) \), \( O(\log n) \), \( O(n) \), \( O(n \log n) \).  
+- **Manageable but slow:** \( O(n^2) \), \( O(n^3) \).  
+- **Unusable for large inputs:** \( O(2^n) \), \( O(n!) \).  
+
+For **efficient algorithms**, aim for at most **\( O(n \log n) \)**.  
 
 ### **4. Differentiate between worst-case and average-case analysis.**  
 - **Worst-case analysis** considers the longest time an algorithm can take for any input of size \( n \), ensuring performance is predictable under maximum workload. Example: Quick Sort worst case is O(n²) when the pivot is the smallest/largest element.  
